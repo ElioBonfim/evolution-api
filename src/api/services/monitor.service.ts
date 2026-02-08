@@ -126,7 +126,17 @@ export class WAMonitoringService {
       },
     });
 
-    return instances;
+    // Override DB connectionStatus with the real in-memory connection state
+    return instances.map((instance) => {
+      const waInstance = this.waInstances[instance.name];
+      if (waInstance) {
+        const realState = waInstance.connectionStatus?.state;
+        if (realState) {
+          return { ...instance, connectionStatus: realState };
+        }
+      }
+      return instance;
+    });
   }
 
   public async instanceInfoById(instanceId?: string, number?: string) {
